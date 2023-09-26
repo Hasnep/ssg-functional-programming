@@ -1,0 +1,40 @@
+name: Build blogpost
+
+on:
+  # Run on all PRs
+  pull_request:
+  # Run when a PR is merged into main
+  push:
+    branches:
+      - main
+  # Build when a release is published
+  release:
+    types:
+      - published
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Set up build folder
+        run: |
+          mkdir -p ./build/ && cp $(find src -type f ! -name ${{ github.event.repository.name }}.md) ./build/
+      - name: Build blogpost
+        uses: docker://pandoc/core:3
+        with:
+          args: |
+            ./src/${{ github.event.repository.name }}.md --from=markdown --to=html --output=./build/blogpost.html
+      - name: Create tarball
+        run: |
+          tar --create --verbose --file=./blogpost.tar --directory=./build .
+      - name: Upload to release
+        run: |
+          gh release upload "${{ github.ref_name }}" ./blogpost.tar
+        if: ${{ github.event_name == 'release' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
