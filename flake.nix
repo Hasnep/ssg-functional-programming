@@ -16,10 +16,26 @@
       perSystem =
         { self', pkgs, ... }:
         {
+          packages =
+            let
+              blogpostName = "ssg-functional-programming";
+            in
+            {
+              default = self'.packages.blogpost;
+              blogpost = pkgs.stdenv.mkDerivation {
+                name = blogpostName;
+                src = pkgs.lib.cleanSource ./.;
+                nativeBuildInputs = [
+                  pkgs.pandoc
+                  pkgs.just
+                ];
+              };
+            };
           devShells.default = pkgs.mkShell {
             packages = [
               # keep-sorted start
               pkgs.deadnix
+              pkgs.just
               pkgs.keep-sorted
               pkgs.nixfmt
               pkgs.nodePackages.prettier
