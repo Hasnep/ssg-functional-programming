@@ -12,18 +12,22 @@ jobs:
   run-pre-commit:
     name: Run pre-commit
     runs-on: ubuntu-latest
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-      cancel-in-progress: true
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v3
-      - name: Install Python
-        uses: actions/setup-python@v4
+        uses: actions/checkout@v4
+      - name: Install Nix
+        uses: nixbuild/nix-quick-install-action@v30
+      - name: Cache Nix environment
+        uses: nix-community/cache-nix-action@v6
         with:
-          python-version: "3.11"
+          primary-key: nix-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-${{ runner.arch }}
+      - name: Use Nix dev shell for subsequent steps
+        uses: rrbutani/use-nix-shell-action@v1
+        with:
+          extraNixOptions: --accept-flake-config
       - name: Run Pre-commit
-        uses: pre-commit/action@v3.0.0
+        run: pre-commit run --all-files
         env:
           # Prevent this action failing when running on the main branch
           SKIP: no-commit-to-branch
