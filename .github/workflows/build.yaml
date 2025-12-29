@@ -12,12 +12,14 @@ on:
     types:
       - published
 
-permissions:
-  contents: write
-
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: false
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
