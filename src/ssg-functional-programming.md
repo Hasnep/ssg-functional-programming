@@ -9,7 +9,7 @@ For my website, I started in 2018 with [Pelican](https://getpelican.com/) before
 These are some of the simplest and most common kinds of SSGs, you just sprinkle your HTML with `{{ special templating syntax }}` like [jinja2](https://jinja.palletsprojects.com/) and the SSG generates your website.
 You can insert things like variables, HTML snippets or rendered markdown and run some control flow logic on the data like conditionals and loops.
 For most websites, templates strike a good balance of high power for their low complexity.
-For example, my website was initally just a homepage and a few sub-pages written in markdown, which is exactly the happy path for these kinds of tools.
+For example, my website was initially just a homepage and a few sub-pages written in markdown, which is exactly the happy path for these kinds of tools.
 ![My website in 2019](my-website-in-2019.webp)
 Once I decided to do some more complex processing to the input data, the template expressions became long and inflexible.
 
