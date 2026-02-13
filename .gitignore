@@ -3,3 +3,6 @@ build/
 
 # Tarballs
 *.tar
+
+# Nix
+.envrc
