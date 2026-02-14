@@ -7,36 +7,19 @@ on:
   push:
     branches:
       - main
-  # Build when a release is published
-  release:
-    types:
-      - published
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-      cancel-in-progress: false
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v2
-      - name: Set up build folder
-        run: |
-          mkdir -p ./build/ && cp $(find src -type f ! -name ${{ github.event.repository.name }}.md) ./build/
-      - name: Build blogpost
-        uses: docker://pandoc/core:3
+      - name: Check out the repository
+        uses: actions/checkout@v4
+      - name: Install Nix
+        uses: nixbuild/nix-quick-install-action@v30
+      - name: Cache Nix environment
+        uses: nix-community/cache-nix-action@v6
         with:
-          args: |
-            ./src/${{ github.event.repository.name }}.md --from=markdown --to=html --output=./build/blogpost.html
-      - name: Create tarball
-        run: |
-          tar --create --verbose --file=./blogpost.tar --directory=./build .
-      - name: Upload to release
-        run: |
-          gh release upload "${{ github.ref_name }}" ./blogpost.tar
-        if: ${{ github.event_name == 'release' }}
-        env:
-          GH_TOKEN: ${{ github.token }}
+          primary-key: nix-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-${{ runner.arch }}
+      - name: Build blogpost
+        run: nix build .#blogpost

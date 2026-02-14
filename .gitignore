@@ -1,8 +1,3 @@
-# Built files
-build/
-
-# Tarballs
-*.tar
-
-# Nix
+/build
 .envrc
+/result
